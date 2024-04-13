@@ -1,0 +1,38 @@
+.hero_wrapper {
+    width: 100%;
+    min-height: calc(100vh - 80px);
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+  .section_right_hero {
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+    justify-content: center;
+    gap: 10px;
+  }
+  .section_right_hero h2 {
+    font-size: 5rem;
+  }
+  .section_left_hero {
+    width: 500px;
+  }
+  .section_left_hero img {
+    position: absolute;
+    top: 10%;
+    /* left: 0%; */
+    width: 500px;
+  }
+  .section_left_hero::before {
+    content: "";
+    position: absolute;
+    width: 600px;
+    top: 18%;
+    left: 47%;
+    height: 600px;
+    border-radius: 50%;
+    background-color: #fffd99;
+  }
