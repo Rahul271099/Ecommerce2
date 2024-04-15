@@ -2,10 +2,10 @@ import React, { useContext } from "react";
 import { Badge, Button, Container, Nav, Navbar } from "react-bootstrap";
 import { CartPlus, Person } from "react-bootstrap-icons";
 import { Link, useNavigate } from "react-router-dom";
-import CartContext from "./contexts/CartContext";
+import UserContext from "./contexts/UserContext";
 
 export default function Navigation() {
-  const cartContext = useContext(CartContext);
+  const userContext = useContext(UserContext);
   const navigate = useNavigate();
 
   return (
@@ -59,7 +59,9 @@ export default function Navigation() {
             <CartPlus as={Button} color="white" size="40" />
           </div>
           <Badge pill bg="warning">
-            {cartContext.products.length}
+            {userContext && userContext.user && userContext.user.productsInCart
+              ? userContext.user.productsInCart.length
+              : 0}
           </Badge>
 
           {localStorage.getItem("token") && localStorage.getItem("id") ? (
@@ -70,7 +72,9 @@ export default function Navigation() {
 
               <div className="d-flex">
                 <p style={{ color: "white", marginTop: "15px" }}>
-                  {localStorage.getItem("username")}
+                  {userContext && userContext.user && userContext.user.username
+                    ? userContext.user.id
+                    : null}
                 </p>
               </div>
             </>

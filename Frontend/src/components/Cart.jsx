@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
-import CartContext from "./contexts/CartContext";
 import ProductBuyCard from "./ProductBuyCart";
+import UserContext from "./contexts/UserContext";
 
 export default function Cart() {
-  const cartContext = useContext(CartContext);
+  const userContext = useContext(UserContext);
 
   return (
     <>
@@ -15,7 +15,7 @@ export default function Cart() {
       <div
         style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}
       >
-        {cartContext.products.map((product) => {
+        {userContext.user.productsInCart.map((product) => {
           return <ProductBuyCard details={product} />;
         })}
       </div>

@@ -5,7 +5,7 @@ const userModel = require("../models/userModel");
 
 let getUser = async (req, resp) => {
   try {
-    resp.status(201).send(await user.find({}));
+    resp.status(200).send(await user.findOne({ id: req.params.id }));
   } catch (error) {
     console.log(error);
     resp.status(500).send("Something went wrong!");
@@ -13,10 +13,9 @@ let getUser = async (req, resp) => {
 };
 
 let saveUser = async (req, resp) => {
+  let dbUser = await userModel.findOne({ id: req.body.id });
 
-  let dbUser = await userModel.findOne({id:req.body.id});
-
-  if(dbUser) {
+  if (dbUser) {
     resp.status(501).send("User already exist with his email id");
   } else {
     let userDetails = req.body;
@@ -29,7 +28,7 @@ let saveUser = async (req, resp) => {
         password: userPassword,
         role: userDetails.role,
         productsInCart: userDetails.productsInCart,
-        products: userDetails.products
+        products: userDetails.products,
       });
       resp.status(201).send("User created");
     } catch (error) {
@@ -37,32 +36,26 @@ let saveUser = async (req, resp) => {
       resp.status(500).send("Something went wrong!");
     }
   }
- 
 };
 
 let updateUser = async (req, resp) => {
   let uId = req.params.id;
-  let dbUser = await userModel.findOne({id:uId});
-  let userUpdateDto = {
-    username:req.body.username,
-    password:req.body.password,
-    productsInCart:req.body.productsInCart,
-    products:req.body.products
-  }
-  if(dbUser) {
+  let dbUser = await userModel.findOne({ id: uId });
+  let userUpdateDto = req.body;
+  console.log("body: ", userUpdateDto);
+  if (dbUser) {
     try {
-      await userModel.updateOne({id:uId},{$set:userUpdateDto});
+      await userModel.updateOne({ id: uId }, { $set: userUpdateDto });
       console.log("User details updated");
-      resp.status(200).send("User updated")
-    } catch(error) {
-      console.log("error")
-      resp.status(500).send("Something went wrong")
+      resp.status(200).send(await userModel.findOne({ id: uId }));
+    } catch (error) {
+      console.log("error");
+      resp.status(500).send("Something went wrong");
     }
   } else {
     resp.status(404).send("User not found");
   }
-
-}
+};
 
 let login = async (req, resp) => {
   let userDetails = req.body;
@@ -75,17 +68,21 @@ let login = async (req, resp) => {
       );
       if (isPasswordEqual) {
         // JWT Token generation
-        let token = jwt.sign({ username: dbUser.username, role: dbUser.role }, "NodeJsRestApi", {
-          expiresIn: "5h",
-        });
+        let token = jwt.sign(
+          { username: dbUser.username, role: dbUser.role },
+          "NodeJsRestApi",
+          {
+            expiresIn: "5h",
+          }
+        );
         resp.status(201).send({
-          "id":dbUser.id,
-          "username":dbUser.username,
-          "phone":dbUser.phone,
-          "cart":dbUser.productsInCart,
-          "products":dbUser.products,
-          "token":token,
-          "role": dbUser.role
+          id: dbUser.id,
+          username: dbUser.username,
+          phone: dbUser.phone,
+          productsInCart: dbUser.productsInCart,
+          products: dbUser.products,
+          token: token,
+          role: dbUser.role,
         });
       } else {
         resp.status(401).send("User not authenticated");
@@ -107,8 +104,8 @@ let verifyAdminToken = (req, resp, next) => {
   }
 
   try {
-    let jwtDetails =  jwt.verify(token, "NodeJsRestApi");
-    if (jwtDetails && jwtDetails.role=="ADMIN") {
+    let jwtDetails = jwt.verify(token, "NodeJsRestApi");
+    if (jwtDetails && jwtDetails.role == "ADMIN") {
       next();
     } else {
       resp.status(401).send("User not authenticated!");
@@ -119,7 +116,6 @@ let verifyAdminToken = (req, resp, next) => {
   }
 };
 
-
 let verifyUserToken = (req, resp, next) => {
   let token;
   if (req.headers["authorization"]) {
@@ -129,8 +125,8 @@ let verifyUserToken = (req, resp, next) => {
   }
 
   try {
-    let jwtDetails =  jwt.verify(token, "NodeJsRestApi");
-    if (jwtDetails && jwtDetails.role=="USER") {
+    let jwtDetails = jwt.verify(token, "NodeJsRestApi");
+    if (jwtDetails && jwtDetails.role == "USER") {
       next();
     } else {
       resp.status(401).send("User not authenticated!");
@@ -149,16 +145,12 @@ let verifyAdminOrUserToken = (req, resp, next) => {
   }
 
   try {
-    let jwtDetails =  jwt.verify(token, "NodeJsRestApi");
+    let jwtDetails = jwt.verify(token, "NodeJsRestApi");
 
-    if (jwtDetails && (jwtDetails.role=="USER" || jwtDetails.role=="ADMIN")) {
-      
-      if(jwtDetails.role=="USER") {
-        req.body = {
-          quantity: req.body.quantity 
-        }
-      }
-
+    if (
+      jwtDetails &&
+      (jwtDetails.role == "USER" || jwtDetails.role == "ADMIN")
+    ) {
       next();
     } else {
       resp.status(401).send("User not authenticated!");
@@ -168,4 +160,12 @@ let verifyAdminOrUserToken = (req, resp, next) => {
   }
 };
 
-module.exports = { getUser, saveUser, login, updateUser, verifyAdminToken, verifyUserToken, verifyAdminOrUserToken };
+module.exports = {
+  getUser,
+  saveUser,
+  login,
+  updateUser,
+  verifyAdminToken,
+  verifyUserToken,
+  verifyAdminOrUserToken,
+};
