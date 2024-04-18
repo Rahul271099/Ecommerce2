@@ -1,13 +1,17 @@
 import { useDispatch, useSelector } from "react-redux";
-import { addTodo, removeTodo } from "../redux/todoSlice";
-import { useState } from "react";
+import { addTodo, fetchTodos, removeTodo } from "../redux/todoSlice";
+import { useEffect, useState } from "react";
 
 export default function Todos() {
   const dispatch = useDispatch();
   const [todo, setTodo] = useState("");
 
-  const todos = useSelector((state) => {
-    return state.todoReducer.todos;
+  useEffect(() => {
+    dispatch(fetchTodos());
+  }, []);
+
+  const todosState = useSelector((state) => {
+    return state.todoReducer;
   });
 
   return (
@@ -48,20 +52,24 @@ export default function Todos() {
         </button>
 
         <ul>
-          {todos.map((todoDetails) => {
-            return (
-              <>
-                <li key={todoDetails.id}>{todoDetails.todo}</li>
-                <button
-                  onClick={() => {
-                    dispatch(removeTodo(todoDetails.id));
-                  }}
-                >
-                  Delete
-                </button>
-              </>
-            );
-          })}
+          {todosState && todosState.isLoading == false ? (
+            todosState.todos.map((todoDetails) => {
+              return (
+                <>
+                  <li key={todoDetails.id}>{todoDetails.todo}</li>
+                  <button
+                    onClick={() => {
+                      dispatch(removeTodo(todoDetails.id));
+                    }}
+                  >
+                    Delete
+                  </button>
+                </>
+              );
+            })
+          ) : (
+            <p>Loading...........</p>
+          )}
         </ul>
       </div>
     </div>
